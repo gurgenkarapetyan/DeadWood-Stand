@@ -1,3 +1,7 @@
+# Cache Directory
+.vs/
+.idea/
+
 # Ignore everything inside Content
 Content/*
 
