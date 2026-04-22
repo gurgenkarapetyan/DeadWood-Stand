@@ -1,0 +1,20 @@
+# Ignore everything inside Content
+Content/*
+
+# BUT allow Blueprints folder
+!Content/Blueprints/
+
+# Allow all files inside Blueprints
+!Content/Blueprints/**
+
+# Unreal junk
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vs/
+*.sln
+
+# OS junk
+.DS_Store
+Thumbs.db
