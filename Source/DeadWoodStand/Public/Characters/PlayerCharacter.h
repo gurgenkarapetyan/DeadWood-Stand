@@ -25,6 +25,7 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
+	void Tick(float DeltaSeconds) override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	
 	/** Movement input handlers */
@@ -36,6 +37,9 @@ protected:
 	void StartSprint();
 	void StopSprint();
 	void ToggleCrouch();
+
+private:
+	void EnableStaminaRecovery();
 	
 protected:
 	/** Mapping context and actions */
@@ -69,4 +73,24 @@ private:
 	float WalkSpeed;
 	float SprintSpeed;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina", meta = (AllowPrivateAccess))
+	float MaxStamina = 100.f;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stamina", meta = (AllowPrivateAccess))
+	float CurrentStamina = 100.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina", meta = (AllowPrivateAccess))
+	float StaminaDrainRate = 25.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina", meta = (AllowPrivateAccess))
+	float StaminaRecoveryRate = 15.f;
+	
+	bool bIsSprinting;
+	
+	FTimerHandle StaminaRecoveryTimerHandle;
+	
+	bool bCanRecoverStamina = true;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Stamina")
+	float StaminaRecoveryDelay = 7.f;
 };

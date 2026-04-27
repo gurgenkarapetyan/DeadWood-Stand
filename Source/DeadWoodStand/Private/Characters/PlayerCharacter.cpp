@@ -52,6 +52,31 @@ void APlayerCharacter::BeginPlay()
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
+void APlayerCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	
+	if (bIsSprinting && CurrentStamina > 0.f)
+	{
+		CurrentStamina -= StaminaDrainRate * DeltaSeconds;
+		if (CurrentStamina <= 0.f)
+		{
+			CurrentStamina = 0.f;
+			StopSprint();
+		}
+	}
+	else if (bCanRecoverStamina)
+	{
+		CurrentStamina = FMath::Clamp(CurrentStamina + StaminaRecoveryRate * DeltaSeconds, 0.f, MaxStamina);
+	}
+	
+	FString StaminString = FString::Printf(TEXT("Stamina: %.1f"), CurrentStamina);
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 0.f, FColor::Green, StaminString);
+	}
+}
+
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -104,12 +129,34 @@ void APlayerCharacter::StopJump()
 
 void APlayerCharacter::StartSprint()
 {
-	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	if (CurrentStamina > 0.f)
+	{
+		bIsSprinting = true;
+		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	}
 }
 
 void APlayerCharacter::StopSprint()
 {
+	bIsSprinting = false;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	
+	// Block recovery and start delay timer
+	bCanRecoverStamina = false;
+	
+	GetWorldTimerManager().ClearTimer(StaminaRecoveryTimerHandle);
+	GetWorld()->GetTimerManager().SetTimer(
+		StaminaRecoveryTimerHandle, 
+		this, 
+		&APlayerCharacter::EnableStaminaRecovery, 
+		StaminaRecoveryDelay, 
+		false
+	);
+}
+
+void APlayerCharacter::EnableStaminaRecovery()
+{
+	bCanRecoverStamina = true;
 }
 
 void APlayerCharacter::ToggleCrouch()
